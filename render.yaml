@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ebay-monitor-api
+    env: node
+    rootDir: .
+    buildCommand: npm install && npx prisma generate && npx prisma db push
+    startCommand: npx ts-node backend/index.ts
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: file:./dev.db
+      - key: EBAY_APP_ID
+        sync: false
+      - key: EXCHANGE_RATE_API_KEY
+        sync: false
+
+  - type: web
+    name: ebay-monitor-frontend
+    env: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npx serve -s dist -l $PORT

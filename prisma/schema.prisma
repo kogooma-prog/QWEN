@@ -1,0 +1,49 @@
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Deal {
+  id               Int      @id @default(autoincrement())
+  ebayId           String   @unique
+  ebayTitle        String
+  ebayPriceUSD     Float
+  ebayUrl          String
+  ebayImage        String?
+
+  coupangProductId String?
+  coupangTitle     String?
+  coupangPriceKRW  Float?
+  coupangUrl       String?
+
+  danawaTitle      String?
+  danawaPriceKRW   Float?
+  danawaUrl        String?
+
+  naverTitle       String?
+  naverPriceKRW    Float?
+  naverUrl         String?
+
+  priceRatio       Float?
+  lastSync         DateTime @default(now())
+  createdAt        DateTime @default(now())
+}
+
+model ExchangeRate {
+  id         Int      @id @default(autoincrement())
+  currency   String   @unique
+  rate       Float
+  lastUpdate DateTime @default(now())
+}
+
+model SyncLog {
+  id        Int      @id @default(autoincrement())
+  status    String
+  message   String?
+  timestamp DateTime @default(now())
+}

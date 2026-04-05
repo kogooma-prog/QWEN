@@ -122,6 +122,28 @@ app.post('/api/sync', async (req, res) => {
   res.json({ message: 'Sync triggered' });
 });
 
+app.post('/api/seed', async (req, res) => {
+  try {
+    const dummyItems = [
+      { ebayId: 'demo-001', ebayTitle: 'Samsung Galaxy Tab A9+ 11" 64GB WiFi Tablet', ebayPriceUSD: 149.99, ebayUrl: 'https://www.ebay.com/itm/demo001', ebayImage: 'https://i.ebayimg.com/images/g/abc/s-l500.webp' },
+      { ebayId: 'demo-002', ebayTitle: 'TCL NXTPAPER 11 Plus Tablet 11.5" 256GB', ebayPriceUSD: 189.99, ebayUrl: 'https://www.ebay.com/itm/demo002', ebayImage: 'https://i.ebayimg.com/images/g/def/s-l500.webp' },
+      { ebayId: 'demo-003', ebayTitle: 'onn. 12.1" Tablet Pro 6GB RAM 128GB Gray', ebayPriceUSD: 119.00, ebayUrl: 'https://www.ebay.com/itm/demo003', ebayImage: 'https://i.ebayimg.com/images/g/ghi/s-l500.webp' },
+      { ebayId: 'demo-004', ebayTitle: 'Lenovo Tab M10 Plus 10.6" 64GB WiFi Tablet', ebayPriceUSD: 129.50, ebayUrl: 'https://www.ebay.com/itm/demo004', ebayImage: 'https://i.ebayimg.com/images/g/jkl/s-l500.webp' },
+      { ebayId: 'demo-005', ebayTitle: 'Apple iPad 10.2" 9th Gen 64GB WiFi Space Gray', ebayPriceUSD: 249.99, ebayUrl: 'https://www.ebay.com/itm/demo005', ebayImage: 'https://i.ebayimg.com/images/g/mno/s-l500.webp' },
+    ];
+    for (const item of dummyItems) {
+      await prisma.deal.upsert({
+        where: { ebayId: item.ebayId },
+        update: { lastSync: new Date() },
+        create: item
+      });
+    }
+    res.json({ message: `Seeded ${dummyItems.length} demo items` });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Task Scheduling (every 6 hours)
 cron.schedule('0 */6 * * *', () => {
   performSync();

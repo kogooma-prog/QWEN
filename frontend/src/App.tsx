@@ -12,6 +12,8 @@ interface Deal {
   lastSync: string;
 }
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 function App() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [page, setPage] = useState(1);
@@ -26,8 +28,8 @@ function App() {
     setLoading(true);
     try {
       const [dealsRes, statusRes] = await Promise.all([
-        axios.get(`/api/deals?page=${page}`),
-        axios.get('/api/status'),
+        axios.get(`${API_URL}/api/deals?page=${page}`),
+        axios.get(`${API_URL}/api/status`),
       ]);
       setDeals(dealsRes.data.deals);
       setTotalPages(dealsRes.data.totalPages);
@@ -48,7 +50,7 @@ function App() {
   const triggerSync = async () => {
     setSyncing(true);
     try {
-      await axios.post('/api/sync');
+      await axios.post(`${API_URL}/api/sync`);
       alert('동기화가 백그라운드에서 시작되었습니다. 잠시 후 새로고침 해주세요.');
     } catch (error) {
       alert('동기화 요청 실패');

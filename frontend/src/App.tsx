@@ -9,6 +9,19 @@ interface Deal {
   ebayPriceUSD: number;
   ebayUrl: string;
   ebayImage: string;
+  bunjangTitle: string | null;
+  bunjangPriceKRW: number | null;
+  bunjangUrl: string | null;
+  daangnnTitle: string | null;
+  daangnnPriceKRW: number | null;
+  daangnnUrl: string | null;
+  naverTitle: string | null;
+  naverPriceKRW: number | null;
+  naverUrl: string | null;
+  danawaTitle: string | null;
+  danawaPriceKRW: number | null;
+  danawaUrl: string | null;
+  priceRatio: number | null;
   lastSync: string;
 }
 
@@ -19,6 +32,9 @@ function App() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sort, setSort] = useState('latest');
   const [status, setStatus] = useState<{ lastSync: any; exchangeRate: number | null }>({
     lastSync: null,
     exchangeRate: null,
@@ -31,8 +47,10 @@ function App() {
   const fetchDeals = async (silent = false) => {
     if (!silent) setLoading(true);
     try {
+      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+      const sortParam = sort !== 'latest' ? `&sort=${sort}` : '';
       const [dealsRes, statusRes] = await Promise.all([
-        axios.get(`${API_URL}/api/deals?page=${page}`),
+        axios.get(`${API_URL}/api/deals?page=${page}${searchParam}${sortParam}`),
         axios.get(`${API_URL}/api/status`),
       ]);
       setDeals(dealsRes.data.deals);
@@ -55,9 +73,30 @@ function App() {
     }
   };
 
+  const handleSearch = () => {
+    setPage(1);
+    setSearchQuery(searchInput);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') handleSearch();
+  };
+
   useEffect(() => {
     fetchDeals();
-  }, [page]);
+  }, [page, searchQuery, sort]);
+
+  // 환율 30분마다 자동 갱신
+  useEffect(() => {
+    const refreshRate = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/status`);
+        setStatus(prev => ({ ...prev, exchangeRate: res.data.exchangeRate }));
+      } catch {}
+    };
+    const id = window.setInterval(refreshRate, 30 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
 
   // Poll for sync progress every 5 seconds
   useEffect(() => {
@@ -115,6 +154,31 @@ function App() {
       <header>
         <h1>eBay VIPOutlet Monitor</h1>
         <div className="controls">
+          <div className="search-box">
+            <input
+              type="text"
+              className="search-input"
+              placeholder="상품명 검색..."
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+            />
+            <button className="btn search-btn" onClick={handleSearch}>검색</button>
+            {searchQuery && (
+              <button className="btn clear-btn" onClick={() => { setSearchInput(''); setSearchQuery(''); setPage(1); }}>✕</button>
+            )}
+          </div>
+          <select
+            className="sort-select"
+            value={sort}
+            onChange={e => { setSort(e.target.value); setPage(1); }}
+          >
+            <option value="latest">최신순</option>
+            <option value="ratio_asc">이베이가 싼 순서</option>
+            <option value="ratio_desc">이베이가 비싼 순서</option>
+            <option value="price_desc">이베이 최고가격</option>
+            <option value="price_asc">이베이 최저가격</option>
+          </select>
           <button className="btn refresh-btn" onClick={() => fetchDeals()} disabled={loading}>
             {loading ? '로딩 중...' : '새로고침'}
           </button>
@@ -156,11 +220,48 @@ function App() {
                       <h3>{deal.ebayTitle}</h3>
                       <div className="price-compare">
                         <div className="price-box ebay">
-                          <span>eBay 가격</span>
+                          <span>eBay</span>
                           <strong>₩{status.exchangeRate ? (deal.ebayPriceUSD * status.exchangeRate).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '-'}</strong>
-                          <small style={{display:'block', color:'#666'}}>${deal.ebayPriceUSD.toFixed(2)} {deal.ebayPriceUSD > 220 ? '(관부과세 포함)' : ''}</small>
-                          <a href={deal.ebayUrl} target="_blank" rel="noreferrer">eBay에서 보기 →</a>
+                          <small>${deal.ebayPriceUSD.toFixed(2)} {deal.ebayPriceUSD > 220 ? '(관부과세 포함)' : ''}</small>
+                          <a href={deal.ebayUrl} target="_blank" rel="noreferrer">보기 →</a>
                         </div>
+                        {deal.bunjangPriceKRW && deal.bunjangUrl && (
+                          <div className="price-box bunjang">
+                            <span>번개장터</span>
+                            <strong>₩{deal.bunjangPriceKRW.toLocaleString()}</strong>
+                            <small>{deal.bunjangTitle?.slice(0, 30)}</small>
+                            <a href={deal.bunjangUrl} target="_blank" rel="noreferrer">보기 →</a>
+                          </div>
+                        )}
+                        {deal.daangnnPriceKRW && deal.daangnnUrl && (
+                          <div className="price-box daangn">
+                            <span>당근마켓</span>
+                            <strong>₩{deal.daangnnPriceKRW.toLocaleString()}</strong>
+                            <small>{deal.daangnnTitle?.slice(0, 30)}</small>
+                            <a href={deal.daangnnUrl} target="_blank" rel="noreferrer">보기 →</a>
+                          </div>
+                        )}
+                        {deal.naverPriceKRW && deal.naverUrl && (
+                          <div className="price-box naver">
+                            <span>네이버 쇼핑</span>
+                            <strong>₩{deal.naverPriceKRW.toLocaleString()}</strong>
+                            <small>{deal.naverTitle?.slice(0, 30)}</small>
+                            <a href={deal.naverUrl} target="_blank" rel="noreferrer">보기 →</a>
+                          </div>
+                        )}
+                        {deal.danawaPriceKRW && deal.danawaUrl && (
+                          <div className="price-box danawa">
+                            <span>다나와</span>
+                            <strong>₩{deal.danawaPriceKRW.toLocaleString()}</strong>
+                            <small>{deal.danawaTitle?.slice(0, 30)}</small>
+                            <a href={deal.danawaUrl} target="_blank" rel="noreferrer">보기 →</a>
+                          </div>
+                        )}
+                        {deal.priceRatio !== null && (
+                          <div className="ratio-badge" title="eBay가격 / 국내최저가">
+                            비율 {(deal.priceRatio * 100).toFixed(0)}%
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

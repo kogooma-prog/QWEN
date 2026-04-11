@@ -33,6 +33,37 @@ h1 {
   display: flex;
   gap: 10px;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.search-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 220px;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #2196F3;
+}
+
+.search-btn {
+  background: #FF6B00;
+  color: white;
+}
+
+.clear-btn {
+  background: #eee;
+  color: #666;
+  padding: 8px 10px;
 }
 
 .btn {
@@ -148,6 +179,51 @@ h1 {
 
 .price-box.ebay {
   background: #e3f2fd;
+}
+
+.sort-select {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+}
+
+.price-box.bunjang {
+  background: #fff3e0;
+}
+
+.price-box.daangn {
+  background: #e8f5e9;
+}
+
+.price-box.naver {
+  background: #e8f5e9;
+}
+
+.price-box.danawa {
+  background: #fce4ec;
+}
+
+.ratio-badge {
+  text-align: center;
+  padding: 4px 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+}
+
+.price-box small {
+  display: block;
+  color: #666;
+  font-size: 11px;
+  margin: 2px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .price-box strong {

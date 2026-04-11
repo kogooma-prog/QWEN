@@ -5,3 +5,6 @@ node_modules
 /generated/prisma
 frontend/dist
 frontend/node_modules
+prisma/dev.db
+frontend/node_modules/
+node_modules/

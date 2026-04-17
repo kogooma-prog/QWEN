@@ -15,6 +15,7 @@ model Deal {
   ebayPriceUSD     Float
   ebayUrl          String
   ebayImage        String?
+  storeCategory    String?
 
   coupangProductId String?
   coupangTitle     String?

@@ -285,3 +285,33 @@ h1 {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.category-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  padding: 8px 18px;
+  border: 2px solid #ddd;
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  border-color: #2196F3;
+  color: #2196F3;
+}
+
+.tab-btn.active {
+  background: #2196F3;
+  border-color: #2196F3;
+  color: white;
+}

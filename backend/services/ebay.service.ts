@@ -34,7 +34,7 @@ export class EbayService {
     return this.accessToken!;
   }
 
-  async fetchItemsFromSeller(sellerName: string, categoryId: string): Promise<EbayItem[]> {
+  async fetchItemsFromSeller(sellerName: string, storeCategoryId: string, ebayCategoryId: string): Promise<EbayItem[]> {
     try {
       const token = await this.getAccessToken();
       const items: EbayItem[] = [];
@@ -47,7 +47,8 @@ export class EbayService {
           {
             params: {
               filter: `sellers:{${sellerName}}`,
-              category_ids: categoryId,
+              category_ids: ebayCategoryId,
+              store_category_ids: storeCategoryId,
               limit,
               offset
             },

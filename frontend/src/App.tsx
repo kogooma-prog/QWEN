@@ -50,7 +50,7 @@ function App() {
       const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
       const sortParam = sort !== 'latest' ? `&sort=${sort}` : '';
       const [dealsRes, statusRes] = await Promise.all([
-        axios.get(`${API_URL}/api/deals?page=${page}${searchParam}${sortParam}`),
+        axios.get(`${API_URL}/api/deals?page=${page}${searchParam}${sortParam}&category=5912048`),
         axios.get(`${API_URL}/api/status`),
       ]);
       setDeals(dealsRes.data.deals);

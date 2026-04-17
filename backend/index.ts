@@ -15,9 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 const categories = [
-  { id: '175672', name: 'Laptops' },
-  { id: '9355', name: 'Cell Phones' },
-  { id: '171485', name: 'Tablets' }
+  { storeId: '5912048', ebayId: '293', name: 'Portable-Electronics' }
 ];
 
 async function performSync() {
@@ -34,7 +32,7 @@ async function performSync() {
 
     for (const category of categories) {
       console.log(`Fetching category: ${category.name}`);
-      const ebayItems = await ebayService.fetchItemsFromSeller('vipoutlet', category.id);
+      const ebayItems = await ebayService.fetchItemsFromSeller('vipoutlet', category.storeId, category.ebayId);
       console.log(`Fetched ${ebayItems.length} items from eBay for ${category.name}.`);
 
       for (const item of ebayItems) {
@@ -55,6 +53,7 @@ async function performSync() {
             ebayPriceUSD: finalUsdPrice,
             ebayUrl: item.url,
             ebayImage: item.image,
+            storeCategory: category.storeId,
             lastSync: new Date()
           },
           create: {
@@ -62,7 +61,8 @@ async function performSync() {
             ebayTitle: item.title,
             ebayPriceUSD: finalUsdPrice,
             ebayUrl: item.url,
-            ebayImage: item.image
+            ebayImage: item.image,
+            storeCategory: category.storeId
           }
         });
       }
@@ -81,11 +81,20 @@ app.get('/api/deals', async (req, res) => {
   const page = parseInt(req.query.page as string) || 1;
   const pageSize = 20;
   const search = (req.query.search as string || '').trim();
+  const category = (req.query.category as string || '').trim();
+
   const sort = (req.query.sort as string) || 'latest';
 
   const searchWhere = search
     ? { ebayTitle: { contains: search, mode: 'insensitive' as const } }
     : {};
+  const categoryWhere = category
+    ? { storeCategory: category }
+    : {};
+  const ratioWhere = (sort === 'ratio_asc' || sort === 'ratio_desc')
+    ? { priceRatio: { not: null } }
+    : {};
+  const where = { ...searchWhere, ...categoryWhere, ...ratioWhere };
 
   const orderBy: any =
     sort === 'price_asc'  ? { ebayPriceUSD: 'asc' }  :
@@ -94,7 +103,7 @@ app.get('/api/deals', async (req, res) => {
 
   const [deals, total] = await Promise.all([
     prisma.deal.findMany({
-      where: searchWhere,
+      where,
       orderBy,
       skip: (page - 1) * pageSize,
       take: pageSize,
@@ -105,10 +114,23 @@ app.get('/api/deals', async (req, res) => {
         ebayPriceUSD: true,
         ebayUrl: true,
         ebayImage: true,
+        bunjangTitle: true,
+        bunjangPriceKRW: true,
+        bunjangUrl: true,
+        daangnnTitle: true,
+        daangnnPriceKRW: true,
+        daangnnUrl: true,
+        naverTitle: true,
+        naverPriceKRW: true,
+        naverUrl: true,
+        danawaTitle: true,
+        danawaPriceKRW: true,
+        danawaUrl: true,
+        priceRatio: true,
         lastSync: true
       }
     }),
-    prisma.deal.count({ where: searchWhere })
+    prisma.deal.count({ where })
   ]);
 
   res.json({
